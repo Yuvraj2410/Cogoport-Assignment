@@ -3,76 +3,34 @@ from sqlalchemy import Engine, text, create_engine
 from Schema import ConfigurationSchema, UpdateConfigurationSchema
 from database import  get_engine, SessionLocal
 from sqlalchemy.orm import Session
-# from Model import CountryConfiguration
 from Model import CountryConfiguration, create_tables
 
 app = FastAPI()
 
-# engine = create_engine('postgresql://postgres:Galaxy-M31@localhost:5432/CogoportDB')
-
 def get_db():
+
     db = SessionLocal()
-    
-    # with engine.begin() as db:
-    #     yield db
+
     try:
         yield db
     finally:
         db.close()
 
-def check_database_connection(db: Session):  # Remove Depends(get_db)
-    try:
-        # Execute a simple query (e.g., SELECT 1)
-        result = db.execute(text("SELECT 1"))
-        result.fetchone()  # Optional: Fetch the result to ensure successful execution
-        return True
-    except Exception as e:
-        print(f"Error connecting to database: {e}")
-        return False
-
-# Example usage with get_db dependency
-# if check_database_connection(get_db()):
-#     print("Database connection established successfully!")
-# else:
-#     print("Error connecting to database!")
-
-
-@app.get("/test_db")
-def test_db(db: Session = Depends(get_db)):
-    if check_database_connection(db):
-        return {"status": "Database connection established successfully!"}
-    else:
-        raise HTTPException(status_code=500, detail="Error connecting to database")
-
-
-# @app.post("/create_configuration/{country_code}")
-# async def create_configuration(
-#     configuration: ConfigurationSchema, db: Session = Depends(get_db)
-# ):
-#     # Retrieve or create the Country object based on country_code
-#     country = (
-#         db.query(Country).filter(Country.code == configuration.country_code).first()
-#     )
-#     if not country:
-#         country = Country(
-#             code=configuration.country_code, name="Country Name to be Added Later"
-#         )  # Placeholder for country name
-#         db.add(country)
-#         db.commit()
-#         db.refresh(country)  # Refresh object to get assigned ID
-#     # Create the Configuration object associated with the Country
-#     new_configuration = Configuration(**configuration, country_id=country.id)
-#     db.add(new_configuration)
-#     db.commit()
-#     db.refresh(new_configuration)
-#     return Configuration(
-#         id=new_configuration.id, country_code=country.code, **configuration.dict()
-#     )
-
-
 @app.post("/create_configuration")
 async def create_configuration(config: ConfigurationSchema = Body(...), db: Session = Depends(get_db)):
+    """
+    Creates a new configuration for a specific country.
+
+    This endpoint accepts a `ConfigurationSchema` object in the request body.
+    It checks for existing configuration for the country and raises an error if
+    one exists. Otherwise, it converts the Pydantic model to a SQLAlchemy model
+    and adds it to the database.
+
+    - Raises HTTPException with status code 409 if a configuration already exists.
+    - Returns a JSON response with a success message on successful creation.
+    """
     # Check for existing configuration for the country
+
     existing_config = db.query(CountryConfiguration).filter_by(country_code=config.country_code).first()
     if existing_config:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Configuration already exists for this country")
@@ -93,6 +51,17 @@ async def create_configuration(config: ConfigurationSchema = Body(...), db: Sess
 
 @app.get("/get_configuration/{country_code}")
 async def get_configuration(country_code: str, db: Session = Depends(get_db)):
+    """
+    Retrieves the configuration for a specific country.
+
+    This endpoint retrieves the configuration associated with the provided `country_code`
+    from the database. It raises an HTTPException with status code 404 if no
+    configuration is found.
+
+    - Raises HTTPException with status code 404 if configuration is not found.
+    - Returns a JSON response containing the retrieved configuration details.
+    """
+
     # """Retrieves the configuration for a specific country."""
     configuration = (
         db.query(CountryConfiguration)
@@ -117,6 +86,19 @@ async def update_configuration(
     configuration_update: UpdateConfigurationSchema = Body(...),
     db: Session = Depends(get_db),
 ):
+    """
+    Updates the configuration for a specific country.
+
+    This endpoint allows updating specific fields of the configuration based on the
+    provided `UpdateConfigurationSchema` data in the request body. It first retrieves
+    the existing configuration and raises an HTTPException with status code 404 if not found.
+    Then, it iterates over the provided update data and sets the corresponding attributes
+    on the existing configuration object. Finally, the updated configuration is saved to the database.
+
+    - Raises HTTPException with status code 404 if configuration is not found.
+    - Returns a JSON response containing the updated configuration details.
+    """
+    
     # """Updates the configuration for a specific country."""
     configuration = (
         db.query(CountryConfiguration)
