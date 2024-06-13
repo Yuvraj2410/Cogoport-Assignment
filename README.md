@@ -14,34 +14,36 @@ This project is a robust and scalable FastAPI application designed to manage a C
 4. **Database Integration**: Uses PostgreSQL as the database with SQLAlchemy ORM for data persistence.
 5. **Security**: Database connection details are managed using environment variables.
 
-## Evaluation Criteria
+## Getting Started
 
-### 1. Functionality
+### Prerequisites
 
-- **Correctness of CRUD Operations**: Each endpoint correctly performs the desired operation on the configuration data.
-- **Data Validation**: Ensures incoming data is validated to prevent incorrect data from being processed.
+- Python 3.7+
+- PostgreSQL
 
-### 2. Code Structure
+### Installation
 
-- **Readability**: The code is well-commented and uses descriptive names for variables and functions.
-- **Maintainability**: Modular design separates concerns, making the code easier to maintain and extend.
-- **Modularity**: Functions and classes are designed to be reusable and self-contained.
+1. **Clone the repository**:
+    ```sh
+    git clone https://github.com/yourusername/configuration-management-system.git
+    cd configuration-management-system
+    ```
 
-### 3. Error Handling
+2. **Install dependencies**:
+    ```sh
+    pip install -r requirements.txt
+    ```
 
-- **Robustness**: Handles various error conditions gracefully.
-- **Informative Error Messages**: Provides clear and helpful error messages for different failure scenarios.
+3. **Set up environment variables**:
+    Create a `.env` file in the root directory and add your database URL.
+    ```
+    DATABASE_URL=postgresql://user:password@localhost/dbname
+    ```
 
-### 4. Documentation
+4. **Run the application**:
+    ```sh
+    uvicorn main:app --reload
+    ```
 
-- **Clear and Concise API Documentation**: Each endpoint is documented with its purpose, request parameters, and expected responses.
-- **Docstrings and Comments**: The code includes docstrings and comments to explain its behavior and purpose.
-
-### 5. Database Schema Design
-
-- **Understanding**: The schema is designed to handle country-specific configuration requirements efficiently.
-- **Data Types**: Appropriate data types are used for each field to ensure data integrity.
-
-### 6. Product Requirements and Scenarios
-
-- **Scenarios Handled**: Various scenarios like creating new configurations, updating existing ones, and handling missing data are covered.
+##Comments and Docstrings
+The code includes comments and docstrings to explain its purpose and behavior. Environment variables are used for database connection details to enhance security and flexibility.
